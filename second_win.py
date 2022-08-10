@@ -58,6 +58,7 @@ class TestWin(QWidget):
         self.btn_test2 = QPushButton(txt_starttest2, self)
         self.btn_test3 = QPushButton(txt_starttest3, self)
 
+
         self.text_name = QLabel(txt_name)
         self.text_age = QLabel(txt_age)
         self.text_test1 = QLabel(txt_test1)
@@ -66,11 +67,27 @@ class TestWin(QWidget):
         self.text_timer = QLabel(txt_timer)
         self.text_timer.setFont(QFont("Times", 36, QFont.Bold))
 
+        self.loc = QLocale(QLocale.English, QLocale.UnitedStates) # язык, страна
+        self.validator = QDoubleValidator()
+        self.validator.setLocale(self.loc)
+
         self.line_name = QLineEdit(txt_hintname)
+
         self.line_age = QLineEdit(txt_hintage)
+        self.line_age.setValidator(self.validator) # возраст должен быть числом!
+        self.line_age.setValidator(QIntValidator(7, 150))
+
         self.line_test1 = QLineEdit(txt_hinttest1)
+        self.line_test1.setValidator(self.validator)
+        self.line_test1.setValidator(QIntValidator(0, 150))
+
         self.line_test2 = QLineEdit(txt_hinttest2)
+        self.line_test2.setValidator(self.validator)
+        self.line_test2.setValidator(QIntValidator(0, 150))
+
         self.line_test3 = QLineEdit(txt_hinttest3)
+        self.line_test3.setValidator(self.validator)
+        self.line_test3.setValidator(QIntValidator(0, 150))
     
         self.l_line = QVBoxLayout()
         self.r_line = QVBoxLayout()
@@ -96,25 +113,63 @@ class TestWin(QWidget):
     
     def next_click(self):
         self.hide()
-        self.fw = FinalWin()
-    
+        self.prs = Person(self.line_name.text, int(self.line_age.text()))
+        self.exp = Experiment(self.prs, self.line_test1.text(), self.line_test2.text(), self.line_test2.text())
+        self.fw = FinalWin(self.exp)
+
     def timer_test1(self):
-        pass
+        global time
+        time = QTime(0, 0, 15)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.timer1Event)
+        self.timer.start(1000)
 
     def timer1Event(self):
-        pass
+        global time
+        time = time.addSecs(-1)
+        self.text_timer.setText(time.toString("hh:mm:ss"))
+        self.text_timer.setFont(QFont("Times", 36, QFont.Bold))
+        self.text_timer.setStyleSheet("color: rgb(0,0,0)")
+        if time.toString("hh:mm:ss") == "00:00:00":
+            self.timer.stop()
 
     def timer2Event(self):
-        pass
+        global time
+        time = time.addSecs(-1)
+        self.text_timer.setText(time.toString("hh:mm:ss")[6:8])
+        self.text_timer.setStyleSheet("color: rgb(0,0,0)")
+        self.text_timer.setFont(QFont("Times", 36, QFont.Bold))
+        if time.toString("hh:mm:ss") == "00:00:00":
+            self.timer.stop()
 
     def timer_bob(self):
-        pass
+        global time
+        time = QTime(0, 0, 30)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.timer2Event)
+        #одно приседание в 1.5 секунды
+        self.timer.start(1500)
 
     def timer3Event(self):
-        pass
+        global time
+        time = time.addSecs(-1)
+        self.text_timer.setText(time.toString("hh:mm:ss"))
+        if int(time.toString("hh:mm:ss")[6:8]) >= 45:
+            self.text_timer.setStyleSheet("color: rgb(0,255,0)")
+        elif int(time.toString("hh:mm:ss")[6:8]) <= 15:
+            self.text_timer.setStyleSheet("color: rgb(0,255,0)")
+        else:
+            self.text_timer.setStyleSheet("color: rgb(0,0,0)")
+        self.text_timer.setFont(QFont("Times", 36, QFont.Bold))
+        if time.toString("hh:mm:ss") == "00:00:00":
+            self.timer.stop()
 
     def timer_final(self):
-        pass
+        global time
+        time = QTime(0, 1, 0)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.timer3Event)
+        self.timer.start(1000)
 
     def connects(self):
         self.btn_next.clicked.connect(self.next_click)
